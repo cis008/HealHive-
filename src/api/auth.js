@@ -1,7 +1,7 @@
 // ─── Real Auth API ───
 // Replaces mockLogin for production use
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 const TOKEN_KEY = 'healhive_token'
 
 export function getToken() {
@@ -33,12 +33,12 @@ export async function login(email, password, role) {
     }
 }
 
-export async function register(name, email, password, role) {
+export async function register(name, email, password, role, extras = {}) {
     try {
         const res = await fetch(`${API_URL}/api/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, password, role }),
+            body: JSON.stringify({ name, email, password, role, ...extras }),
         })
         const data = await res.json()
         if (data.success && data.token) {

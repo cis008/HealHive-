@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HealHive User Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f7f3ee; color: #5d4634; }
+    .wrap { max-width: 880px; margin: 28px auto; }
+    .card { background: #fff; border: 1px solid #eadfce; border-radius: 12px; padding: 18px; margin-bottom: 12px; }
+    a { color: #7b5d45; }
+    .btn { display: inline-block; padding: 10px 14px; border-radius: 10px; background: #7b5d45; color: #fff; text-decoration: none; margin-right: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h2>User Dashboard</h2>
+    <div class="card">
+      <p>Welcome {{ request.user.full_name }}.</p>
+      <p>Total reports generated: <strong>{{ reports_count }}</strong></p>
+      <a class="btn" href="/chatbot/">Start Assessment Chat</a>
+      <a class="btn" href="/chatbot/reports/">View My Reports</a>
+      <a href="/auth/logout/">Logout</a>
+    </div>
+  </div>
+</body>
+</html>

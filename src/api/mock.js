@@ -78,6 +78,8 @@ export const mockSessions = [
         time: '10:00',
         status: 'upcoming',
         type: 'video',
+        room_id: 'room-s-001',
+        meeting_link: 'http://localhost:8000/video-call/room-s-001/',
     },
     {
         id: 's-002',
@@ -88,6 +90,8 @@ export const mockSessions = [
         time: '14:00',
         status: 'completed',
         type: 'video',
+        room_id: 'room-s-002',
+        meeting_link: 'http://localhost:8000/video-call/room-s-002/',
         notes: 'Discussed coping strategies for work-related anxiety.',
     },
 ]
@@ -170,6 +174,7 @@ export async function fetchMetrics() {
 
 export async function bookSession(userId, therapistId, date, time) {
     await delay(700)
+    const roomId = `room-${Date.now()}`
     const newSession = {
         id: `s-${Date.now()}`,
         userId,
@@ -179,6 +184,8 @@ export async function bookSession(userId, therapistId, date, time) {
         time,
         status: 'upcoming',
         type: 'video',
+        room_id: roomId,
+        meeting_link: `http://localhost:8000/video-call/${roomId}/`,
     }
     mockSessions.push(newSession)
     return { success: true, session: newSession }

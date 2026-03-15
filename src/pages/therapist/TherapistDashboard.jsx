@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import { fetchSessions, mockTherapists } from '../../api/mock'
+import { mockTherapists } from '../../api/mock'
 import SessionCard from '../../components/SessionCard'
 import { Calendar, Clock, Users, CheckCircle, Plus, X, Loader2, FileText, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react'
 import { getToken } from '../../api/auth'
+import { fetchMySessions } from '../../api/sessions'
 
 export default function TherapistDashboard() {
     const { user } = useAuth()
@@ -17,22 +18,28 @@ export default function TherapistDashboard() {
     const therapist = mockTherapists.find(t => t.id === user?.id)
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setSessions([
-                { id: 's-101', userId: 'u-001', therapistId: user?.id, therapistName: user?.name, date: '2026-03-01', time: '10:00', status: 'upcoming', type: 'video' },
-                { id: 's-102', userId: 'u-002', therapistId: user?.id, therapistName: user?.name, date: '2026-03-01', time: '14:00', status: 'upcoming', type: 'video' },
-                { id: 's-103', userId: 'u-001', therapistId: user?.id, therapistName: user?.name, date: '2026-02-25', time: '11:00', status: 'completed', type: 'video', notes: 'Follow-up on anxiety management techniques.' },
-            ])
-            setLoading(false)
-        }, 600)
-        return () => clearTimeout(timer)
-    }, [user?.id, user?.name])
+        if (!user?.id) return
+        fetchMySessions('therapist')
+            .then(data => setSessions(data))
+            .catch(() => setSessions([]))
+            .finally(() => setLoading(false))
+    }, [user?.id])
+
+    const handleJoinSession = (session) => {
+        const token = getToken()
+        if (!session?.meeting_link || !token) return
+        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+        const meetingLink = session.meeting_link.startsWith('http')
+            ? session.meeting_link
+            : `${apiBase}${session.meeting_link}`
+        window.location.href = `${meetingLink}?token=${encodeURIComponent(token)}`
+    }
 
     // Fetch clinical reports (therapist only)
     useEffect(() => {
         const token = getToken()
         if (!token) return
-        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/reports`, {
+        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/reports`, {
             headers: { Authorization: `Bearer ${token}` },
         })
             .then(r => r.json())
@@ -117,7 +124,7 @@ export default function TherapistDashboard() {
                         {loading ? (
                             <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-wood-400 animate-spin" /></div>
                         ) : upcomingSessions.length > 0 ? (
-                            <div className="space-y-3">{upcomingSessions.map(s => <SessionCard key={s.id} session={{ ...s, therapistName: 'Patient' }} />)}</div>
+                            <div className="space-y-3">{upcomingSessions.map(s => <SessionCard key={s.id} session={{ ...s, therapistName: 'Patient' }} onJoin={handleJoinSession} />)}</div>
                         ) : (
                             <div className="text-center py-12 bg-white rounded-2xl border border-wood-100">
                                 <Calendar className="w-10 h-10 text-wood-300 mx-auto mb-3" />

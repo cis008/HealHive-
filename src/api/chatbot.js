@@ -5,7 +5,8 @@
 //   therapistReport → saved to the backend for therapists only
 
 const WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || null
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const BACKEND_CHAT_URL = `${API_URL}/api/chatbot/message`
 const TIMEOUT_MS = 30000   // 30s — assessment scoring steps can be slow
 const MAX_RETRIES = 3
 
@@ -55,7 +56,46 @@ async function saveTherapistReport(sessionId, userMessage, therapistReport, meta
 }
 
 export async function sendMessage(message, sessionId = null, history = []) {
-    // ── Mock mode ──
+    // ── Primary mode: HealHive backend (CrewAI + LangChain) ──
+    try {
+        const backendResponse = await fetchWithTimeout(BACKEND_CHAT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message,
+                sessionId,
+                history: history.map(m => ({
+                    role: m.isBot ? 'assistant' : 'user',
+                    content: m.text,
+                })),
+                timestamp: new Date().toISOString(),
+            }),
+        })
+
+        if (backendResponse.ok) {
+            const data = await backendResponse.json()
+            if (data?.success && data.reply) {
+                if (data.therapistReport && sessionId) {
+                    saveTherapistReport(
+                        sessionId,
+                        message,
+                        data.therapistReport,
+                        { toolUsed: data.toolUsed, score: data.score, severity: data.severity }
+                    )
+                }
+
+                return {
+                    success: true,
+                    reply: data.reply,
+                    flagged: data.flagged || false,
+                }
+            }
+        }
+    } catch {
+        // Continue to fallback chain below
+    }
+
+    // ── Fallback 1: n8n webhook (existing integration) ──
     if (!WEBHOOK_URL) {
         await new Promise(r => setTimeout(r, 800 + Math.random() * 1200))
         const response = mockResponses[mockIndex % mockResponses.length]

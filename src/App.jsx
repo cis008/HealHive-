@@ -8,6 +8,7 @@ import Footer from './components/Footer'
 import Landing from './pages/public/Landing'
 import AnonymousChat from './pages/public/AnonymousChat'
 import Login from './pages/public/Login'
+import Signup from './pages/public/Signup'
 
 // User pages
 import UserDashboard from './pages/user/UserDashboard'
@@ -42,6 +43,7 @@ function AppLayout() {
                     <Route path="/" element={<Landing />} />
                     <Route path="/chat" element={<AnonymousChat />} />
                     <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
 
                     {/* User — Protected */}
                     <Route path="/user/dashboard" element={

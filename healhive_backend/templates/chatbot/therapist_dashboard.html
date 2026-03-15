@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HealHive Therapist Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f7f3ee; color: #5d4634; }
+    .wrap { max-width: 980px; margin: 28px auto; }
+    .card { background: #fff; border: 1px solid #eadfce; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 10px; border-bottom: 1px solid #efe3d2; vertical-align: top; }
+    .severity { padding: 2px 8px; border-radius: 999px; background: #efe3d2; color: #6b4f3b; font-size: 12px; }
+    a { color: #7b5d45; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h2>Therapist Dashboard</h2>
+    <p><a href="/auth/logout/">Logout</a></p>
+    <div class="card">
+      <h3>Assigned Patient Assessment Reports</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>Assessment</th>
+            <th>Score</th>
+            <th>Severity</th>
+            <th>Recommendations</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for report in reports %}
+          <tr>
+            <td>{{ report.user.full_name }}</td>
+            <td>{{ report.test.name }}</td>
+            <td><strong>{{ report.total_score }}</strong></td>
+            <td><span class="severity">{{ report.severity_level }}</span></td>
+            <td>{{ report.recommended_next_steps }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5">No reports found for assigned patients yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HealHive Admin Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f7f3ee; color: #5d4634; }
+    .wrap { max-width: 980px; margin: 28px auto; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .card { background: #fff; border: 1px solid #eadfce; border-radius: 12px; padding: 16px; }
+    .metric { font-size: 24px; font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { text-align: left; padding: 10px; border-bottom: 1px solid #efe3d2; }
+    a { color: #7b5d45; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h2>Admin Dashboard</h2>
+    <p><a href="/auth/logout/">Logout</a></p>
+    <div class="grid">
+      <div class="card"><div>Total Users</div><div class="metric">{{ total_users }}</div></div>
+      <div class="card"><div>Total Therapists</div><div class="metric">{{ total_therapists }}</div></div>
+      <div class="card"><div>Total Reports</div><div class="metric">{{ total_reports }}</div></div>
+    </div>
+
+    <div class="card" style="margin-top: 12px;">
+      <h3>Recent Assessments (No Score Visibility)</h3>
+      <table>
+        <thead>
+          <tr><th>Assessment</th><th>Severity</th><th>Created</th></tr>
+        </thead>
+        <tbody>
+          {% for report in recent_reports %}
+            <tr>
+              <td>{{ report.test.name }}</td>
+              <td>{{ report.severity_level }}</td>
+              <td>{{ report.created_at }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="3">No reports yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

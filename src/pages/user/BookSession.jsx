@@ -1,8 +1,22 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { fetchTherapists, bookSession } from '../../api/mock'
+import { fetchAvailableTherapists, createSessionBooking } from '../../api/sessions'
 import { Calendar, Clock, CheckCircle, User, Loader2, ArrowLeft } from 'lucide-react'
+
+function nextDaysAvailability(days = 5) {
+    const slots = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00']
+    const availability = []
+
+    for (let index = 1; index <= days; index += 1) {
+        const dateObj = new Date()
+        dateObj.setDate(dateObj.getDate() + index)
+        const isoDate = dateObj.toISOString().slice(0, 10)
+        availability.push({ date: isoDate, slots })
+    }
+
+    return availability
+}
 
 export default function BookSession() {
     const { user } = useAuth()
@@ -14,23 +28,41 @@ export default function BookSession() {
     const [selectedSlot, setSelectedSlot] = useState(null)
     const [booking, setBooking] = useState(false)
     const [booked, setBooked] = useState(false)
+    const [bookingError, setBookingError] = useState('')
 
     useEffect(() => {
-        fetchTherapists().then(data => {
-            setTherapists(data)
-            if (user?.assignedTherapist) {
-                const assigned = data.find(t => t.id === user.assignedTherapist)
-                if (assigned) setSelectedTherapist(assigned)
-            }
-            setLoading(false)
-        })
+        fetchAvailableTherapists()
+            .then(data => {
+                const normalized = data.map(t => ({
+                    ...t,
+                    availability: nextDaysAvailability(),
+                }))
+                setTherapists(normalized)
+                if (user?.assignedTherapist) {
+                    const assigned = normalized.find(t => t.id === user.assignedTherapist || t.userId === user.assignedTherapist)
+                    if (assigned) setSelectedTherapist(assigned)
+                }
+            })
+            .catch(() => setTherapists([]))
+            .finally(() => setLoading(false))
     }, [user?.assignedTherapist])
 
     const handleBook = async () => {
         if (!selectedTherapist || !selectedDate || !selectedSlot) return
         setBooking(true)
-        await bookSession(user.id, selectedTherapist.id, selectedDate, selectedSlot)
-        setBooked(true)
+        setBookingError('')
+
+        const result = await createSessionBooking({
+            therapistId: selectedTherapist.id,
+            date: selectedDate,
+            time: selectedSlot,
+        })
+
+        if (result?.success) {
+            setBooked(true)
+        } else {
+            setBookingError(typeof result?.error === 'string' ? result.error : 'Unable to book session. Please try again.')
+        }
         setBooking(false)
     }
 
@@ -133,10 +165,13 @@ export default function BookSession() {
                                 )}
 
                                 {selectedSlot && (
-                                    <button onClick={handleBook} disabled={booking}
-                                        className="mt-6 w-full py-3 rounded-xl text-sm font-medium text-white bg-gradient-to-r from-wood-700 to-wood-600 hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-                                        {booking ? <><Loader2 className="w-4 h-4 animate-spin" /> Booking...</> : 'Confirm Booking'}
-                                    </button>
+                                    <>
+                                        <button onClick={handleBook} disabled={booking}
+                                            className="mt-6 w-full py-3 rounded-xl text-sm font-medium text-white bg-gradient-to-r from-wood-700 to-wood-600 hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+                                            {booking ? <><Loader2 className="w-4 h-4 animate-spin" /> Booking...</> : 'Confirm Booking'}
+                                        </button>
+                                        {bookingError && <p className="mt-2 text-xs text-red-500">{bookingError}</p>}
+                                    </>
                                 )}
                             </>
                         ) : (

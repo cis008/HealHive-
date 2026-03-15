@@ -10,6 +10,11 @@ export default function SessionCard({ session, onJoin }) {
     const config = statusConfig[session.status] || statusConfig.upcoming
     const StatusIcon = config.icon
 
+    const sessionDateTime = session.session_time
+        ? new Date(session.session_time)
+        : new Date(`${session.date}T${session.time}:00`)
+    const canJoinNow = Number.isNaN(sessionDateTime.getTime()) ? true : new Date() >= sessionDateTime
+
     return (
         <div className="bg-white rounded-2xl border border-wood-100 p-5 hover:shadow-md hover:border-wood-200 transition-all duration-300 group">
             <div className="flex items-start justify-between mb-3">
@@ -33,11 +38,16 @@ export default function SessionCard({ session, onJoin }) {
             )}
 
             {session.status === 'upcoming' && onJoin && (
-                <button onClick={() => onJoin(session)}
-                    className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium text-white bg-gradient-to-r from-wood-600 to-wood-500 hover:shadow-lg hover:shadow-wood-300/40 transition-all duration-300">
+                <>
+                <button onClick={() => onJoin(session)} disabled={!canJoinNow}
+                    className={`mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium text-white bg-gradient-to-r from-wood-600 to-wood-500 transition-all duration-300 ${canJoinNow ? 'hover:shadow-lg hover:shadow-wood-300/40' : 'opacity-50 cursor-not-allowed'}`}>
                     <Video className="w-4 h-4" />
-                    Join Session
+                    Join Video Session
                 </button>
+                {!canJoinNow && (
+                    <p className="mt-2 text-[11px] text-wood-400">Session link activates at scheduled time.</p>
+                )}
+                </>
             )}
         </div>
     )

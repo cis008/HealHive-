@@ -11,7 +11,7 @@ const stages = [
 
 export default function VerificationStatus() {
     const { user } = useAuth()
-    const verified = user?.role === 'therapist'
+    const verified = !!user?.therapistVerified
     const currentStage = verified ? 3 : 1
 
     return (

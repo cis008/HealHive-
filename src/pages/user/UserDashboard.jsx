@@ -1,27 +1,39 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { fetchSessions, mockTherapists } from '../../api/mock'
+import { mockTherapists } from '../../api/mock'
+import { getToken } from '../../api/auth'
+import { fetchMySessions } from '../../api/sessions'
 import SessionCard from '../../components/SessionCard'
 import { Calendar, MessageCircle, User, Loader2 } from 'lucide-react'
 
 export default function UserDashboard() {
     const { user } = useAuth()
-    const navigate = useNavigate()
     const [sessions, setSessions] = useState([])
     const [loading, setLoading] = useState(true)
 
     const therapist = mockTherapists.find(t => t.id === user?.assignedTherapist)
 
     useEffect(() => {
-        fetchSessions(user?.id).then(data => {
-            setSessions(data)
-            setLoading(false)
-        })
+        if (!user?.id) return
+        fetchMySessions('user')
+            .then(data => setSessions(data))
+            .catch(() => setSessions([]))
+            .finally(() => setLoading(false))
     }, [user?.id])
 
     const upcomingSessions = sessions.filter(s => s.status === 'upcoming')
     const pastSessions = sessions.filter(s => s.status === 'completed')
+
+    const handleJoinSession = (session) => {
+        const token = getToken()
+        if (!session?.meeting_link || !token) return
+        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+        const meetingLink = session.meeting_link.startsWith('http')
+            ? session.meeting_link
+            : `${apiBase}${session.meeting_link}`
+        window.location.href = `${meetingLink}?token=${encodeURIComponent(token)}`
+    }
 
     return (
         <div className="pt-16 min-h-screen bg-gradient-to-b from-wood-50 to-white">
@@ -77,7 +89,7 @@ export default function UserDashboard() {
                             ) : upcomingSessions.length > 0 ? (
                                 <div className="space-y-3">
                                     {upcomingSessions.map(s => (
-                                        <SessionCard key={s.id} session={s} onJoin={() => navigate('/user/session')} />
+                                        <SessionCard key={s.id} session={s} onJoin={handleJoinSession} />
                                     ))}
                                 </div>
                             ) : (

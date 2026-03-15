@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HealHive AI Chatbot</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f7f3ee; }
+    .layout { max-width: 860px; margin: 20px auto; background: white; border-radius: 14px; border: 1px solid #eadfce; box-shadow: 0 12px 28px rgba(63, 41, 24, .08); overflow: hidden; }
+    .header { padding: 14px 18px; background: #6b4f3b; color: white; display: flex; justify-content: space-between; align-items: center; }
+    .disclaimer { background: #faf1e2; border-bottom: 1px solid #e9d8c0; padding: 10px 14px; color: #7a5c44; font-size: 13px; }
+    .messages { height: 520px; overflow-y: auto; padding: 14px; background: #fcfaf7; }
+    .bubble { max-width: 75%; margin: 8px 0; padding: 10px 12px; border-radius: 12px; line-height: 1.5; white-space: pre-wrap; }
+    .assistant { background: #efe3d2; color: #5d4634; }
+    .user { background: #e3d3c0; color: #5d4634; margin-left: auto; }
+    .controls { padding: 12px; border-top: 1px solid #e5e7eb; background: #fff; }
+    .row { display: flex; gap: 8px; }
+    input { flex: 1; padding: 12px; border: 1px solid #d9c8b5; border-radius: 10px; }
+    button { padding: 12px 16px; border: none; border-radius: 10px; background: #7b5d45; color: #fff; font-weight: 700; }
+    .progress { margin-top: 8px; font-size: 12px; color: #7a6655; }
+  </style>
+</head>
+<body>
+  <div class="layout" id="chatRoot" data-conversation-id="{% if conversation %}{{ conversation.id }}{% endif %}">
+    <div class="header">
+      <div>HealHive Mental Health Assistant</div>
+      <div>
+        <a href="/chatbot/reports/" style="color: #f3e3d1; margin-right: 12px;">Reports</a>
+        <a href="/auth/logout/" style="color: #ffe2c1;">Logout</a>
+      </div>
+    </div>
+    <div class="disclaimer">{{ disclaimer }}</div>
+    <div id="messages" class="messages">
+      {% for m in messages %}
+      <div class="bubble {{ m.role }}">{{ m.content }}</div>
+      {% endfor %}
+      {% if not messages %}
+      <div class="bubble assistant">Hi {{ request.user.full_name }}, I’m your HealHive assistant. Tell me how you’ve been feeling lately.</div>
+      {% endif %}
+    </div>
+    <div class="controls">
+      <div class="row">
+        <input id="chatInput" placeholder="Type your response... (use option number during assessments)" />
+        <button id="sendBtn">Send</button>
+      </div>
+      <div id="progressText" class="progress"></div>
+    </div>
+  </div>
+  <script src="/static/js/chatbot_ui.js"></script>
+</body>
+</html>

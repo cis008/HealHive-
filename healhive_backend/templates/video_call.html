@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HealHive Video Session</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #0f172a; color: #fff; }
+        .container { min-height: 100vh; display: flex; flex-direction: column; }
+        .videos { flex: 1; display: grid; grid-template-columns: 1fr 320px; gap: 12px; padding: 16px; }
+        video { width: 100%; height: 100%; border-radius: 12px; object-fit: cover; background: #111827; }
+        .panel { background: #1f2937; border-radius: 12px; padding: 12px; }
+        .controls { display: flex; justify-content: center; gap: 12px; padding: 16px; border-top: 1px solid #374151; }
+        button { border: 0; border-radius: 999px; padding: 10px 16px; cursor: pointer; font-weight: 600; }
+        button.secondary { background: #374151; color: #fff; }
+        button.danger { background: #ef4444; color: #fff; }
+        .timer { text-align: center; font-size: 14px; color: #cbd5e1; margin-top: 8px; }
+        .status { display: flex; justify-content: center; gap: 8px; font-size: 13px; color: #cbd5e1; margin-top: 8px; }
+        .waiting { text-align: center; color: #fbbf24; font-size: 13px; margin-top: 6px; }
+    </style>
+</head>
+<body>
+    <div class="container" id="video-root" data-room-id="{{ room_id }}" data-token="{{ token }}" data-display-name="{{ display_name }}">
+        <div class="videos">
+            <div class="panel">
+                <h3>Remote Participant</h3>
+                <video id="remoteVideo" autoplay playsinline></video>
+            </div>
+            <div class="panel">
+                <h3>Your Camera</h3>
+                <video id="localVideo" autoplay playsinline muted></video>
+                <div class="timer" id="sessionTimer">00:00</div>
+                <div class="status">Connection: <span id="connectionStatus">Connecting...</span></div>
+                <div class="waiting" id="waitingMessage">Waiting for the other participant to join...</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="secondary" id="toggleMicBtn">Mute</button>
+            <button class="secondary" id="toggleCamBtn">Camera Off</button>
+            <button class="danger" id="endSessionBtn">End Session</button>
+        </div>
+    </div>
+
+    <script src="/static/js/video_call.js"></script>
+</body>
+</html>

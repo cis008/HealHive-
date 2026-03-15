@@ -43,6 +43,10 @@ export default function Landing() {
                                 className="px-8 py-4 text-wood-700 font-medium rounded-2xl border border-wood-300 hover:bg-white/60 hover:border-wood-400 transition-all duration-300">
                                 I have an account
                             </Link>
+                            <Link to="/signup"
+                                className="px-8 py-4 text-wood-700 font-medium rounded-2xl border border-wood-300 hover:bg-white/60 hover:border-wood-400 transition-all duration-300">
+                                Sign up
+                            </Link>
                         </div>
                     </div>
                 </div>

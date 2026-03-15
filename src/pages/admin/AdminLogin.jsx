@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { mockLogin } from '../../api/mock'
+import { login as apiLogin } from '../../api/auth'
 import { ShieldCheck, Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react'
 
 export default function AdminLogin() {
     const { login } = useAuth()
     const navigate = useNavigate()
-    const [userId, setUserId] = useState('')
+    const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [error, setError] = useState('')
@@ -15,10 +15,10 @@ export default function AdminLogin() {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        if (!userId.trim() || !password.trim()) { setError('Please fill in all fields.'); return }
+        if (!email.trim() || !password.trim()) { setError('Please fill in all fields.'); return }
         setError('')
         setLoading(true)
-        const result = await mockLogin(userId, password, 'admin')
+        const result = await apiLogin(email.trim(), password, 'admin')
         if (result.success) { login(result.user); navigate('/admin', { replace: true }) }
         else { setError(result.error) }
         setLoading(false)
@@ -38,9 +38,9 @@ export default function AdminLogin() {
                 <div className="bg-wood-900/50 backdrop-blur-xl border border-wood-800 rounded-3xl p-6 sm:p-8">
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
-                            <label htmlFor="admin-id" className="block text-sm font-medium text-wood-300 mb-1.5">Admin ID</label>
-                            <input id="admin-id" type="text" value={userId} onChange={e => setUserId(e.target.value)}
-                                placeholder="Enter admin ID"
+                            <label htmlFor="admin-id" className="block text-sm font-medium text-wood-300 mb-1.5">Admin Email</label>
+                            <input id="admin-id" type="email" value={email} onChange={e => setEmail(e.target.value)}
+                                placeholder="Enter admin email"
                                 className="w-full px-4 py-3 rounded-xl border border-wood-700 text-sm text-white placeholder-wood-500 bg-wood-800/50 outline-none transition-all focus:border-beige-400 focus:ring-2 focus:ring-beige-400/20" />
                         </div>
                         <div>
@@ -62,14 +62,13 @@ export default function AdminLogin() {
                             </div>
                         )}
 
-                        <button type="submit" disabled={loading || !userId.trim() || !password.trim()}
+                        <button type="submit" disabled={loading || !email.trim() || !password.trim()}
                             className="w-full py-3 rounded-xl text-white font-medium text-sm bg-gradient-to-r from-beige-600 to-beige-500 disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-beige-500/25 transition-all flex items-center justify-center gap-2">
                             {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Authenticating...</> : 'Access Dashboard'}
                         </button>
                     </form>
                 </div>
-
-                <p className="text-center text-[11px] text-wood-600 mt-4">Demo: enter any credentials to login</p>
+                <p className="text-center text-[11px] text-wood-600 mt-4">Use your real admin account credentials</p>
             </div>
         </div>
     )

@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AlertCircle, Loader2, CheckCircle, ArrowRight } from 'lucide-react'
+import { register } from '../../api/auth'
 
 export default function TherapistSignup() {
     const navigate = useNavigate()
-    const [form, setForm] = useState({ name: '', email: '', license: '', specialization: '', bio: '', password: '' })
+    const [form, setForm] = useState({ name: '', email: '', license: '', university: '', specialization: '', bio: '', password: '' })
     const [errors, setErrors] = useState({})
     const [loading, setLoading] = useState(false)
     const [submitted, setSubmitted] = useState(false)
@@ -19,6 +20,7 @@ export default function TherapistSignup() {
         if (!form.name.trim()) errs.name = 'Full name is required'
         if (!form.email.trim()) errs.email = 'Email is required'
         if (!form.license.trim()) errs.license = 'License number is required'
+        if (!form.university.trim()) errs.university = 'University name is required'
         if (!form.specialization) errs.specialization = 'Please select a specialization'
         if (!form.bio.trim()) errs.bio = 'Brief bio is required'
         if (!form.password.trim()) errs.password = 'Password is required'
@@ -32,8 +34,14 @@ export default function TherapistSignup() {
         if (Object.keys(errs).length > 0) { setErrors(errs); return }
         setErrors({})
         setLoading(true)
-        await new Promise(r => setTimeout(r, 1200))
-        setSubmitted(true)
+        const result = await register(form.name.trim(), form.email.trim(), form.password, 'therapist', {
+            specialization: form.specialization,
+            license_number: form.license.trim(),
+            university_name: form.university.trim(),
+            bio: form.bio.trim(),
+        })
+        if (result.success) setSubmitted(true)
+        else setErrors({ submit: typeof result.error === 'string' ? result.error : 'Unable to submit application.' })
         setLoading(false)
     }
 
@@ -91,6 +99,11 @@ export default function TherapistSignup() {
                             {errors.license && <p className="flex items-center gap-1 mt-1 text-xs text-red-500"><AlertCircle className="w-3 h-3" />{errors.license}</p>}
                         </div>
                         <div>
+                            <label className="block text-sm font-medium text-wood-700 mb-1.5">University Name</label>
+                            <input value={form.university} onChange={e => update('university', e.target.value)} placeholder="e.g. Stanford University" className={inputCls('university')} />
+                            {errors.university && <p className="flex items-center gap-1 mt-1 text-xs text-red-500"><AlertCircle className="w-3 h-3" />{errors.university}</p>}
+                        </div>
+                        <div>
                             <label className="block text-sm font-medium text-wood-700 mb-1.5">Specialization</label>
                             <select value={form.specialization} onChange={e => update('specialization', e.target.value)}
                                 className={`${inputCls('specialization')} ${!form.specialization ? 'text-wood-400' : ''}`}>
@@ -115,6 +128,7 @@ export default function TherapistSignup() {
                             className="w-full py-3 rounded-xl text-white font-medium text-sm bg-gradient-to-r from-wood-700 to-wood-600 hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2">
                             {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting...</> : 'Submit Application'}
                         </button>
+                        {errors.submit && <p className="flex items-center gap-1 mt-1 text-xs text-red-500"><AlertCircle className="w-3 h-3" />{errors.submit}</p>}
                     </form>
 
                     <p className="text-center text-sm text-wood-500 mt-6">

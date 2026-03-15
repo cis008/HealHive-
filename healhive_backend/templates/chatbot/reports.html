@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HealHive Reports</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f7f3ee; color: #5d4634; }
+    .wrap { max-width: 860px; margin: 24px auto; }
+    .card { background: #fff; border: 1px solid #eadfce; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+    .top { display: flex; justify-content: space-between; }
+    .severity { padding: 2px 8px; border-radius: 999px; background: #efe3d2; color: #6b4f3b; font-size: 12px; }
+    a { color: #7b5d45; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p><a href="/chatbot/">← Back to chatbot</a></p>
+    <h2>Your Mental Health Reports</h2>
+    {% for report in reports %}
+      <div class="card">
+        <div class="top">
+          <strong>{{ report.test.name }}</strong>
+          <span class="severity">{{ report.severity_level }}</span>
+        </div>
+        <p><strong>Emotional Observations:</strong> {{ report.emotional_observations }}</p>
+        <p><strong>Recommended Next Steps:</strong> {{ report.recommended_next_steps }}</p>
+        <p><strong>Therapy Options:</strong> {{ report.suggested_therapy_options }}</p>
+      </div>
+    {% empty %}
+      <p>No reports yet. Complete an assessment in the chatbot first.</p>
+    {% endfor %}
+  </div>
+</body>
+</html>
